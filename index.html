@@ -1,0 +1,290 @@
+
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+<meta charset='UTF-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>John Aaron Portfolio</title>
+<style>
+:root{
+  --bg:#eef1f5;--card:#fff;--accent:#0a6ed1;--muted:#6b7280;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial}
+body{background:var(--bg);padding:20px}
+.hidden{display:none!important;}
+
+#passwordScreen{
+  position:fixed;inset:0;background:#ffffff;display:flex;justify-content:center;
+  align-items:center;text-align:center;padding:20px;z-index:9999;
+}
+.pass-box{width:100%;max-width:350px;}
+
+input{
+  width:100%;padding:12px;font-size:16px;border-radius:8px;
+  border:1px solid #ccc;margin-top:12px;
+}
+
+button{
+  background:var(--accent);color:white;border:none;padding:10px 14px;
+  border-radius:8px;margin-top:10px;font-size:15px;cursor:pointer;
+}
+
+.ghost{background:white;color:var(--accent);border:1px solid var(--accent)}
+
+.container{max-width:750px;margin:0 auto;padding:10px;}
+
+.card{
+  background:var(--card);padding:18px;margin:12px 0;border-radius:12px;
+  box-shadow:0 4px 18px rgba(0,0,0,0.08);
+}
+
+.profile-pic{
+  width:150px;height:150px;border-radius:50%;object-fit:cover;margin:auto;
+  display:block;
+}
+
+.social-item{display:flex;align-items:center;gap:10px;margin:8px 0}
+.social-item img{width:28px;height:28px}
+
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+#removeMenu{
+  position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+  background:white;padding:20px;border-radius:10px;box-shadow:0 0 12px rgba(0,0,0,0.2);
+  width:90%;max-width:360px;display:none;z-index:2000;
+}
+</style>
+</head>
+
+<body>
+
+<!-- PASSWORD SCREEN -->
+<div id="passwordScreen">
+  <div class="pass-box">
+    <h2>WELCOME TO JOHN AARON'S PORTFOLIO</h2>
+    <input id="viewPassInput" type="password" placeholder="Enter Password">
+    <button id="toggleView" class="ghost">Show / Hide</button>
+    <button id="enterView">Enter</button>
+    <p id="err" style="color:red;margin-top:8px;height:20px"></p>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div id="mainContent" class="hidden">
+  <div class="container">
+
+    <div class="card">
+      <img id="profilePic" class="profile-pic" src="">
+      <div class="controls">
+        <button id="uploadPic" class="ghost hidden">Upload Photo</button>
+        <button id="editBtn">Edit</button>
+        <button id="doneBtn" class="hidden">Done</button>
+      </div>
+      <h2 style="text-align:center;margin-top:10px;">JOHN AARON R. RESURRECCION</h2>
+    </div>
+
+    <div class="card">
+      <h3>About Me</h3>
+      <p id="aboutText">I am John Aaron...</p>
+    </div>
+
+    <div class="card">
+      <h3>Socials</h3>
+      <div id="socialList"></div>
+      <div class="controls">
+        <button id="addSocial" class="hidden">Add Social</button>
+        <button id="removeSocial" class="ghost hidden">Remove Social</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Contact</h3>
+      <p id="contactText">Globe: ...</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- REMOVE MENU -->
+<div id="removeMenu">
+  <h3>Select a Social to Remove</h3>
+  <select id="socialSelect" style="padding:10px;width:100%;margin-top:12px;border-radius:8px"></select>
+  <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+    <button id="confirmRemove">Remove</button>
+    <button id="cancelRemove" class="ghost">Cancel</button>
+  </div>
+</div>
+
+<script>
+// HASH FUNCTION (SHA-256)
+async function hash(text){
+  const msg = new TextEncoder().encode(text);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", msg);
+  return Array.from(new Uint8Array(hashBuffer)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+
+// STORED HASHES
+let VIEW_HASH = "";
+let EDIT_HASH = "";
+
+// set passwords
+(async()=>{
+  VIEW_HASH = await hash("Stellotenebris");
+  EDIT_HASH = await hash("Johnaaron_rr04");
+})();
+
+// ELEMENTS
+const ps = document.getElementById("passwordScreen");
+const mc = document.getElementById("mainContent");
+const vp = document.getElementById("viewPassInput");
+const err = document.getElementById("err");
+
+// SHOW/HIDE PASSWORD
+document.getElementById("toggleView").onclick=()=>{
+  vp.type = vp.type==="password"?"text":"password";
+};
+
+// ENTER VIEW PASSWORD
+document.getElementById("enterView").onclick = async()=>{
+  const entered = await hash(vp.value);
+  if(entered === VIEW_HASH){
+    ps.style.display="none";
+    mc.classList.remove("hidden");
+    loadState();
+  } else {
+    err.innerText="Incorrect password";
+  }
+};
+
+// EDIT MODE
+const editBtn=document.getElementById("editBtn");
+const doneBtn=document.getElementById("doneBtn");
+const uploadPic=document.getElementById("uploadPic");
+const addSocial=document.getElementById("addSocial");
+const removeSocial=document.getElementById("removeSocial");
+const aboutText=document.getElementById("aboutText");
+const contactText=document.getElementById("contactText");
+const profilePic=document.getElementById("profilePic");
+
+editBtn.onclick=async()=>{
+  let pw = prompt("Enter edit password:");
+  if(!pw) return;
+  if(await hash(pw) !== EDIT_HASH) return alert("Wrong password.");
+
+  uploadPic.classList.remove("hidden");
+  addSocial.classList.remove("hidden");
+  removeSocial.classList.remove("hidden");
+  doneBtn.classList.remove("hidden");
+
+  aboutText.contentEditable=true;
+  contactText.contentEditable=true;
+};
+
+doneBtn.onclick=()=>{
+  uploadPic.classList.add("hidden");
+  addSocial.classList.add("hidden");
+  removeSocial.classList.add("hidden");
+  doneBtn.classList.add("hidden");
+  aboutText.contentEditable=false;
+  contactText.contentEditable=false;
+  saveState();
+};
+
+// UPLOAD PIC
+uploadPic.onclick=()=>{
+  let i=document.createElement("input");
+  i.type="file"; i.accept="image/*";
+  i.onchange=e=>{
+    let r=new FileReader();
+    r.onload=ev=>{ profilePic.src=ev.target.result; saveState(); };
+    r.readAsDataURL(e.target.files[0]);
+  };
+  i.click();
+};
+
+// SOCIAL ICON DETECT
+function detectIcon(name){
+  name=name.toLowerCase();
+  if(name.includes("facebook"))return "https://cdn-icons-png.flaticon.com/512/733/733547.png";
+  if(name.includes("instagram"))return "https://cdn-icons-png.flaticon.com/512/2111/2111463.png";
+  if(name.includes("twitter")||name.includes("x."))return "https://cdn-icons-png.flaticon.com/512/733/733579.png";
+  if(name.includes("youtube"))return "https://cdn-icons-png.flaticon.com/512/1384/1384060.png";
+  if(name.includes("tiktok"))return "https://cdn-icons-png.flaticon.com/512/3046/3046121.png";
+  return "https://cdn-icons-png.flaticon.com/512/565/565547.png";
+}
+
+// ADD SOCIAL
+function addSocialItem(n,u,i){
+  let box=document.createElement("div");
+  box.className="social-item";
+  box.innerHTML = `<img src="${i}"><a href="${u}" target="_blank"><span class="sname">${n}</span></a>`;
+  document.getElementById("socialList").append(box);
+}
+
+addSocial.onclick=()=>{
+  const n=prompt("Social Name:");
+  const u=prompt("URL:");
+  if(!n||!u)return;
+  addSocialItem(n,u,detectIcon(n));
+  saveState();
+};
+
+// REMOVE SOCIAL
+removeSocial.onclick=()=>{
+  let sel=document.getElementById("socialSelect");
+  sel.innerHTML="";
+  document.querySelectorAll(".sname").forEach(s=>{
+    let o=document.createElement("option");
+    o.textContent=s.innerText;
+    sel.append(o);
+  });
+  document.getElementById("removeMenu").style.display="block";
+};
+
+document.getElementById("cancelRemove").onclick=()=>{
+  document.getElementById("removeMenu").style.display="none";
+};
+
+document.getElementById("confirmRemove").onclick=()=>{
+  let val=document.getElementById("socialSelect").value;
+  document.querySelectorAll(".social-item").forEach(i=>{
+    if(i.querySelector(".sname").innerText===val) i.remove();
+  });
+  saveState();
+  document.getElementById("removeMenu").style.display="none";
+};
+
+// SAVE + LOAD
+function saveState(){
+  let socials=[];
+  document.querySelectorAll(".social-item").forEach(i=>{
+    socials.push({
+      name:i.querySelector(".sname").innerText,
+      url:i.querySelector("a").href,
+      icon:i.querySelector("img").src
+    });
+  });
+  const data={
+    about:aboutText.innerText,
+    contact:contactText.innerHTML,
+    profilePic:profilePic.src,
+    socials
+  };
+  localStorage.setItem("portfolioSave",JSON.stringify(data));
+}
+
+function loadState(){
+  let raw=localStorage.getItem("portfolioSave");
+  if(!raw)return;
+  let d=JSON.parse(raw);
+
+  aboutText.innerText=d.about;
+  contactText.innerHTML=d.contact;
+  profilePic.src=d.profilePic;
+
+  socialList.innerHTML="";
+  d.socials.forEach(s=>addSocialItem(s.name,s.url,s.icon));
+}
+</script>
+</body>
+</html>
