@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio</title>
+</head>
+<body>
+<h1>Firebase Connected Template</h1>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCmuovFi9Xjj4ddGgBxH3WpHbVKdNA9GRk",
+    authDomain: "aaron-portfolio-611ac.firebaseapp.com",
+    projectId: "aaron-portfolio-611ac",
+    storageBucket: "aaron-portfolio-611ac.firebasestorage.app",
+    messagingSenderId: "343673933744",
+    appId: "1:343673933744:web:bafd4688c3267586d0d075"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  console.log("Firebase initialized.");
+</script>
+
+</body>
+</html>
